@@ -40,7 +40,7 @@ def go(args):
     )
     artifact.add_file(filename)
 
-    logger.info("Logging clean sample rtifact")
+    logger.info("Logging clean sample artifact")
     run.log_artifact(artifact)
 
 if __name__ == "__main__":
