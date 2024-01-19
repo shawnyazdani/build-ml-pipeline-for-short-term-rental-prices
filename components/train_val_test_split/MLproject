@@ -1,4 +1,4 @@
-name: download_file
+name: split_dataset
 conda_env: conda.yml
 
 entry_points:
