@@ -48,6 +48,7 @@ def go(args):
     # Log MAE and r2
     run.summary['r2'] = r_squared
     run.summary['mae'] = mae
+    run.finish()
 
 
 if __name__ == "__main__":
