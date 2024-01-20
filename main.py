@@ -16,7 +16,7 @@ _steps = [
     # NOTE: We do not include this in the steps so it is not run by mistake.
     # You first need to promote a model export to "prod" before you can run this,
     # then you need to run this step explicitly
-   "test_regression_model" #not run by default, since requires manually promiting a model to 'production' status in W&B first
+#    "test_regression_model" #not run by default, since requires manually promiting a model to 'production' status in W&B first
 ]
 
 
