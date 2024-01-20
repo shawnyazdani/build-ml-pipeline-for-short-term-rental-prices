@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 import mlflow
 import json
-
+import tempfile
 import pandas as pd
 import numpy as np
 from sklearn.compose import ColumnTransformer
@@ -92,8 +92,8 @@ def go(args):
 
 
     # Save model package in the MLFlow sklearn format
-    if os.path.exists("random_forest_dir"):
-        shutil.rmtree("random_forest_dir")
+    # if os.path.exists("random_forest_dir"):
+    #     shutil.rmtree("random_forest_dir")
 
     ######################################
     # Save the sk_pipe pipeline as a mlflow.sklearn model in the directory "random_forest_dir"
@@ -102,17 +102,17 @@ def go(args):
     object_cols = X_val.select_dtypes(include=['object']).columns.tolist()
     X_val[object_cols] = X_val[object_cols].astype(str)
     signature = infer_signature(X_val, y_pred) #infers schema of input and output
-    
-    logger.info("Exporting model")
-    export_path = os.path.join("random_forest_dir")
+    with tempfile.TemporaryDirectory() as temp_dir:
+        logger.info("Exporting model")
+        export_path = os.path.join(temp_dir, "random_forest_dir")
 
-    mlflow.sklearn.save_model(
-            sk_pipe,
-            export_path,
-            serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_CLOUDPICKLE,
-            signature=signature,
-            input_example=X_val.iloc[:2],
-        )
+        mlflow.sklearn.save_model(
+                sk_pipe,
+                export_path,
+                serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_CLOUDPICKLE,
+                signature=signature,
+                input_example=X_val.iloc[:2],
+            )
     ######################################
 
     ######################################
@@ -121,15 +121,15 @@ def go(args):
     # type, provide a description and add rf_config as metadata. Then, use the .add_dir method of the artifact instance
     # you just created to add the "random_forest_dir" directory to the artifact, and finally use
     # run.log_artifact to log the artifact to the run
-    artifact = wandb.Artifact(
-            name=args.output_artifact,
-            type="model_export",
-            description="Random Forest Regressor pipeline/model export",
-            metadata=rf_config
-        )
-    artifact.add_dir(export_path)
-    run.log_artifact(artifact)
-    artifact.wait()
+        artifact = wandb.Artifact(
+                name=args.output_artifact,
+                type="model_export",
+                description="Random Forest Regressor pipeline/model export",
+                metadata=rf_config
+            )
+        artifact.add_dir(export_path)
+        run.log_artifact(artifact)
+        artifact.wait()
     ######################################
 
     # Plot feature importance
@@ -148,6 +148,7 @@ def go(args):
           "feature_importance": wandb.Image(fig_feat_imp),
         }
     )
+    run.finish()
 
 
 def plot_feature_importance(pipe, feat_names):
